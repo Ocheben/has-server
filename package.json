@@ -10,6 +10,12 @@
   "author": "Oche Onoja",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.4"
+    "express": "^4.16.4",
+    "nodemon": "^1.18.11",
+    "pg": "^7.10.0"
+  },
+  "engines": {
+    "node": "11.10.0",
+    "npm": "6.9.0"
   }
 }
