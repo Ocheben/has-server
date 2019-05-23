@@ -11,7 +11,13 @@ app.use(bodyParser.urlencoded({
 }))
 app.use(express.json())
 app.use(cors());
-const port = process.env.PORT || 7000;
+
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+  });
+const port = process.env.PORT || 5000;
 
 app.get('/', (req, res) => {
     res.send('Hello, Hire a Service')
