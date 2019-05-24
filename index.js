@@ -23,6 +23,6 @@ app.post('/signup', db.signUp);
 app.post('/signup/init', db.initiateSignup);
 app.post('/signup/verify', db.verifyOtp)
 app.post('/login', db.login)
-app.listen(process.env.PORT || 5000, () => {
+app.listen(process.env.PORT, () => {
     console.log(`App running on port ${port}`)
 })
