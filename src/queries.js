@@ -146,7 +146,17 @@ const signUp = async (req, res) => {
         }
         await query(createQuery, values);
         const token = Helper.generateToken(phone);
-        return res.status(200).json({meta:{status:200, message:'Succesfully loggin in',}, data: {jwt: token}});
+        return res.status(200).json({
+            meta:{
+                status:200,
+                message:'Succesfully logged in',
+            },
+            data: {
+                jwt: token,
+                role: 'admin',
+                userId: checkEmail.rows[0].userid
+            }
+        });
     } catch (err) {
         return res.status(400).send(err);
     }
@@ -175,11 +185,204 @@ const login = async(req, res) => {
                 token,
                 firstname: checkEmail.rows[0].firstname,
                 lastname: checkEmail.rows[0].lastname,
-                role: 'admin'
+                role: 'admin',
+                userId: checkEmail.rows[0].userid
             }
         })
     } catch (err) {
         return res.status(400).send(err)
+    }
+}
+
+const getJobs = async(req, res) => {
+    const { user_id } = req.params;
+    const getQuery = "SELECT * FROM jobs WHERE user_id = $1";
+    try {
+        const getJob = await query(getQuery, [user_id]);
+        if(!getJob.rows[0]) {
+            return res.status(404).json({
+                meta:{
+                    status: 404,
+                    message: 'No Records found',
+                    info: 'No Records found'
+                }
+            })
+        } else {
+            return res.status(200).json({
+                meta:{
+                    status: 200,
+                    message: 'Success',
+                    info: 'Success'
+                },
+                data: {
+                    jobs: getJob.rows
+                }
+            })
+        }
+    }
+    catch (err) {
+        return res.status(400).send(err)
+    }
+}
+
+const getSkillJobs = async(req, res) => {
+    const { skill_id } = req.params;
+    const getQuery = "SELECT * FROM jobs WHERE skill_id = $1";
+    try {
+        const getJob = await query(getQuery, [skill_id]);
+        if(!getJob.rows[0]) {
+            return res.status(404).json({
+                meta:{
+                    status: 404,
+                    message: 'No Records found',
+                    info: 'No Records found'
+                }
+            })
+        } else {
+            return res.status(200).json({
+                meta:{
+                    status: 200,
+                    message: 'Success',
+                    info: 'Success'
+                },
+                data: {
+                    jobs: getJob.rows
+                }
+            })
+        }
+    }
+    catch (err) {
+        return res.status(400).send(err)
+    }
+}
+
+const getJobById = async(req, res) => {
+    const { job_id } = req.params;
+    const getQuery = "SELECT * FROM jobs WHERE job_id = $1";
+    try {
+        const getJob = await query(getQuery, [job_id]);
+        if(!getJob.rows[0]) {
+            return res.status(404).json({
+                meta:{
+                    status: 404,
+                    message: 'No Records found',
+                    info: 'No Records found'
+                }
+            })
+        } else {
+            return res.status(200).json({
+                meta:{
+                    status: 200,
+                    message: 'Success',
+                    info: 'Success'
+                },
+                data: {
+                    job: getJob.rows[0]
+                }
+            })
+        }
+    }
+    catch (err) {
+        return res.status(400).send(err)
+    }
+}
+
+const postJob = async(req, res) => {
+    const { userId, jobTitle, jobDesc, price, skillId, duration, date } = req.body;
+    const addQuery = "INSERT INTO jobs (user_id, job_title, job_desc, price, skill_id, duration, date_added) VALUES ($1, $2, $3, $4, $5, $6, $7)";
+    const values = [userId, jobTitle, jobDesc, price, skillId, duration, date]
+
+    try {
+        await query(addQuery, values);
+        res.status(200).json({
+            meta:{
+                status: 200,
+                message: "Job successfully posted",
+                info: "OK"
+            }
+        })
+    } catch (err) {
+        return res.status(400).send(err)
+    }
+}
+
+const getUserBids = async(req, res) => {
+    const { user_id } = req.params;
+    const getQuery = "SELECT * FROM bids WHERE user_id = $1";
+    try {
+        const getBids = await query(getQuery, [user_id]);
+        if(!getBids.rows[0]) {
+            return res.status(404).json({
+                meta:{
+                    status: 404,
+                    message: 'No Records found',
+                    info: 'No Records found'
+                }
+            })
+        } else {
+            return res.status(200).json({
+                meta:{
+                    status: 200,
+                    message: 'Success',
+                    info: 'Success'
+                },
+                data: {
+                    bids: getBids.rows
+                }
+            })
+        }
+    }
+    catch (err) {
+        return res.status(400).send(err)
+    }
+}
+const getJobBids = async(req, res) => {
+    const { job_id } = req.params;
+    const getQuery = "SELECT * FROM bids WHERE job_id = $1";
+    try {
+        const getBids = await query(getQuery, [job_id]);
+        if(!getBids.rows[0]) {
+            return res.status(404).json({
+                meta:{
+                    status: 404,
+                    message: 'No Records found',
+                    info: 'No Records found'
+                }
+            })
+        } else {
+            return res.status(200).json({
+                meta:{
+                    status: 200,
+                    message: 'Success',
+                    info: 'Success'
+                },
+                data: {
+                    bids: getBids.rows
+                }
+            })
+        }
+    }
+    catch (err) {
+        return res.status(400).send(err)
+    }
+}
+
+const postBid = async(req, res) => {
+    const {userId, jobId, skillId, skillLevel, message, duration, price, date} = req.body;
+    const addQuery = "INSERT INTO bids(user_id, job_id, skill_id, skill_level, message, duration, price, date_added) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)";
+    const values = [userId, jobId, skillId, skillLevel, message, duration, price, date];
+
+    try {
+        await query(addQuery, values);
+        res.status(200).json({
+            meta: {
+                status: 200,
+                message: "Bid posted successfully posted",
+                info: "Succesful"
+            }
+        })
+    } catch (err) {
+        return res.status(400).send(err);
     }
 }
 
@@ -188,5 +391,12 @@ module.exports = {
     signUp,
     initiateSignup,
     verifyOtp,
-    login
+    login,
+    getJobs,
+    getSkillJobs,
+    getJobById,
+    getUserBids,
+    getJobBids,
+    postJob,
+    postBid
 }

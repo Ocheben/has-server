@@ -2,21 +2,24 @@
   "name": "has-server",
   "version": "1.0.0",
   "description": "Express Server for Hire a Service App",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/index.js",
+    "test": "mocha --reporter progress buildScripts/testSetup.js \"src/**/*.test.js\""
   },
   "author": "Oche Onoja",
   "license": "ISC",
   "dependencies": {
     "africastalking": "^0.4.0",
+    "babel-register": "^6.26.0",
     "bcrypt": "^3.0.6",
     "body-parser": "^1.18.3",
+    "chai": "^4.2.0",
     "cors": "^2.8.5",
     "dotenv": "^7.0.0",
     "express": "^4.16.4",
     "jsonwebtoken": "^8.5.1",
+    "mocha": "^6.1.4",
     "nodemon": "^1.18.11",
     "pg": "^7.10.0"
   }

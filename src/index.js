@@ -21,8 +21,15 @@ app.get('/', (req, res) => {
 app.get('/db', db.getTable);
 app.post('/signup', db.signUp);
 app.post('/signup/init', db.initiateSignup);
-app.post('/signup/verify', db.verifyOtp)
-app.post('/login', db.login)
+app.post('/signup/verify', db.verifyOtp);
+app.post('/login', db.login);
+app.get('/jobs/user/:user_id', db.getJobs);
+app.get('/jobs/skill/:skill_id', db.getSkillJobs);
+app.get('/jobs/:job_id', db.getJobById);
+app.get('/bids/user/:user_id', db.getUserBids);
+app.get('/bids/job/:job_id', db.getJobBids);
+app.post('/jobs', db.postJob)
+app.post('/bids', db.postBid)
 app.listen(process.env.PORT, () => {
     console.log(`App running on port ${port}`)
 })
