@@ -4,7 +4,7 @@
   "description": "Express Server for Hire a Service App",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "npx nodemon",
     "test": "mocha --reporter progress buildScripts/testSetup.js \"src/**/*.test.js\""
   },
   "author": "Oche Onoja",

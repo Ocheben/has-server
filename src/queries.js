@@ -338,7 +338,7 @@ const getUserBids = async(req, res) => {
 }
 const getJobBids = async(req, res) => {
     const { job_id } = req.params;
-    const getQuery = "SELECT * FROM bids WHERE job_id = $1";
+    const getQuery = "SELECT b.*, u.firstname, u.lastname, u.email, u.phone FROM bids b join users u on b.user_id = u.user_id WHERE b.job_id = $1";
     try {
         const getBids = await query(getQuery, [job_id]);
         if(!getBids.rows[0]) {
