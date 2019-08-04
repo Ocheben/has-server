@@ -3,9 +3,12 @@ const express = require('express');
 const db = require('./queries');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const Sentry = require('@sentry/node');
 
 const app = express();
 const port = process.env.PORT || 7000;
+
+Sentry.init({ dsn: 'https://809218825d4a44768cee5509fa3c0888@sentry.io/1521240' });
 
 app.use(express.json())
 app.use(cors());

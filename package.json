@@ -14,26 +14,27 @@
   "author": "Oche Onoja",
   "license": "ISC",
   "dependencies": {
+    "@sentry/node": "^5.5.0",
     "africastalking": "^0.4.0",
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^10.0.2",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-latest": "^6.24.1",
     "babel-register": "^6.26.0",
     "bcrypt": "^3.0.6",
     "body-parser": "^1.18.3",
     "chai": "^4.2.0",
     "cors": "^2.8.5",
     "dotenv": "^7.0.0",
+    "eslint": "^6.1.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-watch": "^6.0.0",
     "express": "^4.16.4",
     "jsonwebtoken": "^8.5.1",
     "mocha": "^6.1.4",
     "nodemon": "^1.18.11",
     "npm-run-all": "^4.1.5",
-    "pg": "^7.10.0",
-    "babel-cli": "^6.26.0",
-    "babel-eslint": "^10.0.2",
-    "babel-polyfill": "^6.26.0",
-    "babel-preset-latest": "^6.24.1",
-    "eslint": "^6.1.0",
-    "eslint-plugin-import": "^2.18.2",
-    "eslint-watch": "^6.0.0"
+    "pg": "^7.10.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -42,6 +43,7 @@
     "babel-preset-latest": "^6.24.1",
     "eslint": "^6.1.0",
     "eslint-plugin-import": "^2.18.2",
-    "eslint-watch": "^6.0.0"
+    "eslint-watch": "^6.0.0",
+    "nyc": "^14.1.1"
   }
 }
