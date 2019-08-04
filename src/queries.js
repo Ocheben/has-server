@@ -16,7 +16,11 @@ const pool = new Pool({
     ssl: true
 });
 
+const testfun = () => {
+    return false
+}
 const query = (text, params) => {
+    // eslint-disable-next-line no-undef
     return new Promise((resolve, reject) => {
       pool.query(text, params)
       .then((res) => {
@@ -398,5 +402,6 @@ module.exports = {
     getUserBids,
     getJobBids,
     postJob,
-    postBid
+    postBid,
+    testfun
 }
