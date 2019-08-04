@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "npm-run-all  --parallel open:src lint:watch test:watch",
-    "open:src": "npx nodemon",
+    "open:src": "babel-node src/index.js",
     "test": "mocha --reporter progress buildScripts/testSetup.js \"src/**/*.test.js\"",
     "test:watch": "npm run test -- --watch",
     "lint": "esw src buildScripts --color",
@@ -28,7 +28,10 @@
     "pg": "^7.10.0"
   },
   "devDependencies": {
+    "babel-cli": "^6.26.0",
     "babel-eslint": "^10.0.2",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-latest": "^6.24.1",
     "eslint": "^6.1.0",
     "eslint-plugin-import": "^2.18.2",
     "eslint-watch": "^6.0.0"

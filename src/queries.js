@@ -1,3 +1,4 @@
+import 'babel-polyfill'
 const Pool = require('pg').Pool;
 const AfricasTalking = require('africastalking');
 const Helper = require('./helper')
@@ -63,14 +64,13 @@ const getTable = (req, res) => {
 //     })
 // }
 
-const initiateSignup = async(req, res) => {
+const initiateSignup = async (req, res) => {
     const {email, phone, } = req.body;
     const checkEmailQuery = 'SELECT exists (SELECT 1 FROM users WHERE email = $1 LIMIT 1)';
     const checkPhoneQuery = 'SELECT exists (SELECT 1 FROM users WHERE phone = $1 LIMIT 1)';
     const addOtpQuery = 'INSERT INTO otps (phone, otp) VALUES ($1, $2) ON CONFLICT (phone) DO UPDATE SET otp = $2'
     const apiKey = '5d79ca484c5eb4542c9e617a29c46628ce215f81d5e1b7c64feb8179bd2dd7ef';
     const randomNumber = Math.floor(1000 + Math.random() * 9000);
-    const CONFIG_VERIFICATION_CODE = 'VC-' + randomNumber;
     const message = 'Your login verification code is: ' + randomNumber;
     const africasTalking = new AfricasTalking({
         username: 'sandbox',
