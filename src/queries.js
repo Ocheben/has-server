@@ -17,7 +17,7 @@ const pool = new Pool({
 });
 
 const testfun = () => {
-    return false
+    return true
 }
 const query = (text, params) => {
     // eslint-disable-next-line no-undef
