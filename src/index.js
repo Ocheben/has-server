@@ -8,7 +8,10 @@ const Sentry = require('@sentry/node');
 const app = express();
 const port = process.env.PORT || 7000;
 
-Sentry.init({ dsn: 'https://809218825d4a44768cee5509fa3c0888@sentry.io/1521240' });
+Sentry.init({ dsn: 'https://d11ef976a4df4019aa7a79862da76ccd@sentry.io/1521250' });
+
+// The request handler must be the first middleware on the app
+app.use(Sentry.Handlers.requestHandler());
 
 app.use(express.json())
 app.use(cors());
@@ -33,6 +36,9 @@ app.get('/bids/user/:user_id', db.getUserBids);
 app.get('/bids/job/:job_id', db.getJobBids);
 app.post('/jobs', db.postJob)
 app.post('/bids', db.postBid)
+
+// The error handler must be before any other error middleware and after all controllers
+app.use(Sentry.Handlers.errorHandler());
 app.listen(process.env.PORT, () => {
     console.log(`App running on port ${port}`)
 })
