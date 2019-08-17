@@ -190,7 +190,7 @@ const login = async(req, res) => {
                 firstname: checkEmail.rows[0].firstname,
                 lastname: checkEmail.rows[0].lastname,
                 role: 'admin',
-                userId: checkEmail.rows[0].userid
+                userId: checkEmail.rows[0].user_id
             }
         })
     } catch (err) {
