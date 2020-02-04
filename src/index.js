@@ -30,12 +30,14 @@ app.post('/signup/init', db.initiateSignup);
 app.post('/signup/verify', db.verifyOtp);
 app.post('/login', db.login);
 app.get('/jobs/user/:user_id', db.getJobs);
+app.get('/skills', db.getSkills);
 app.get('/jobs/skill/:skill_id', db.getSkillJobs);
 app.get('/jobs/:job_id', db.getJobById);
 app.get('/bids/user/:user_id', db.getUserBids);
 app.get('/bids/job/:job_id', db.getJobBids);
-app.post('/jobs', db.postJob)
-app.post('/bids', db.postBid)
+app.post('/jobs', db.postJob);
+app.post('/bids', db.postBid);
+app.post('/wallet', db.creditWallet);
 
 // The error handler must be before any other error middleware and after all controllers
 app.use(Sentry.Handlers.errorHandler());
