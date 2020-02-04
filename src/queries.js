@@ -32,6 +32,7 @@ const query = (text, params) => {
       })
     })
   }
+  
 
 const getTable = (req, res) => {
     pool.query('SELECT * FROM users', (error, results) => {
@@ -179,6 +180,7 @@ const login = async(req, res) => {
             return res.status(406).json({meta:{status:406, message: 'Password is incorrect', info:'password is incorrect'}})
         }
         const token = Helper.generateToken(checkEmail.rows[0].phone);
+        const user = checkEmail.rows[0]
         return res.status(200).json({
             meta:{
                 status:200, 
@@ -187,10 +189,15 @@ const login = async(req, res) => {
             },
             data: {
                 token,
-                firstname: checkEmail.rows[0].firstname,
-                lastname: checkEmail.rows[0].lastname,
+                firstname: user.firstname,
+                lastname: user.lastname,
+                email: user.email,
+                phone: user.phone,
+                rating: user.rating,
+                jobsCompleted: user.jobs_completed,
+                walletBal: user.wallet_bal,
                 role: 'admin',
-                userId: checkEmail.rows[0].user_id
+                userId: user.user_id
             }
         })
     } catch (err) {
@@ -220,6 +227,37 @@ const getJobs = async(req, res) => {
                 },
                 data: {
                     jobs: getJob.rows
+                }
+            })
+        }
+    }
+    catch (err) {
+        return res.status(400).send(err)
+    }
+}
+
+const getSkills = async(req, res) => {
+    // const { user_id } = req.params;
+    const getQuery = "SELECT * FROM skills";
+    try {
+        const getSkill = await query(getQuery);
+        if(!getSkill.rows[0]) {
+            return res.status(404).json({
+                meta:{
+                    status: 404,
+                    message: 'No Records found',
+                    info: 'No Records found'
+                }
+            })
+        } else {
+            return res.status(200).json({
+                meta:{
+                    status: 200,
+                    message: 'Success',
+                    info: 'Success'
+                },
+                data: {
+                    skills: getSkill.rows
                 }
             })
         }
@@ -292,9 +330,9 @@ const getJobById = async(req, res) => {
 }
 
 const postJob = async(req, res) => {
-    const { userId, jobTitle, jobDesc, price, skillId, duration, date } = req.body;
-    const addQuery = "INSERT INTO jobs (user_id, job_title, job_desc, price, skill_id, duration, date_added) VALUES ($1, $2, $3, $4, $5, $6, $7)";
-    const values = [userId, jobTitle, jobDesc, price, skillId, duration, date]
+    const { userId, jobTitle, jobDesc, price, skillId, date } = req.body;
+    const addQuery = "INSERT INTO jobs (user_id, job_title, job_desc, price, skill_id, date_added) VALUES ($1, $2, $3, $4, $5, $6)";
+    const values = [userId, jobTitle, jobDesc, price, skillId, date]
 
     try {
         await query(addQuery, values);
@@ -390,6 +428,25 @@ const postBid = async(req, res) => {
     }
 }
 
+const creditWallet = async (req, res) => {
+    const { email, amount } = req.body;
+    const uptQuery = 'UPDATE users SET wallet_bal = wallet_bal + $1 where email = $2';
+    const values = [amount, email];
+
+    try {
+        await query(uptQuery, values);
+        res.status(200).json({
+            meta: {
+                status: 200,
+                message: 'Wallet Credited',
+                info: 'Succesful'
+            }
+        });
+    } catch (err) {
+        return res.status(400).send(err);
+    }
+}
+
 module.exports = {
     getTable,
     signUp,
@@ -397,11 +454,13 @@ module.exports = {
     verifyOtp,
     login,
     getJobs,
+    getSkills,
     getSkillJobs,
     getJobById,
     getUserBids,
     getJobBids,
     postJob,
     postBid,
-    testfun
+    testfun,
+    creditWallet
 }

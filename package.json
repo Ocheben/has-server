@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "npm-run-all  --parallel open:src lint:watch test:watch",
-    "open:src": "babel-node src/index.js",
+    "open:src": "nodemon src/index.js --exec babel-node",
     "test": "mocha --reporter progress buildScripts/testSetup.js \"src/**/*.test.js\"",
     "test:watch": "npm run test -- --watch",
     "lint": "esw src buildScripts --color",
