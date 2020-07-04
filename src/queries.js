@@ -128,13 +128,15 @@ const verifyOtp = async (req, res) => {
 }
 
 const signUp = async (req, res) => {
-    const {firstname, lastname, email, phone, password} = req.body;
+    const {firstname, lastname, email, phone, password, validid} = req.body;
     const hashPassword = Helper.hashPassword(password);
     const verifyQuery = 'SELECT exists (SELECT 1 FROM otps WHERE phone = $1 AND isVerified = true LIMIT 1)'
-    const createQuery = 'INSERT INTO users (firstname, lastname, email, phone, password) VALUES ($1, $2, $3, $4, $5)';
+    const createQuery = 'INSERT INTO users (firstname, lastname, email, phone, password, valid_id) VALUES ($1, $2, $3, $4, $5, $6)';
     const checkEmailQuery = 'SELECT exists (SELECT 1 FROM users WHERE email = $1 LIMIT 1)';
     const checkPhoneQuery = 'SELECT exists (SELECT 1 FROM users WHERE phone = $1 LIMIT 1)';
-    const values = [firstname, lastname, email, phone, hashPassword];
+    const emailQuery = 'SELECT * FROM users WHERE email = $1';
+    const values = [firstname, lastname, email, phone, hashPassword, validid];
+    console.log(firstname, lastname, email, phone, password);
     
     try {
         const checkEmail = await query(checkEmailQuery, [email])
@@ -149,17 +151,31 @@ const signUp = async (req, res) => {
         if ( !checkOtp.rows[0].exists ) {
             return res.status(404).json({meta: {status: 404, message: `Phone number has not been verified`, info: "phone not verified"}})
         }
-        await query(createQuery, values);
-        const token = Helper.generateToken(phone);
+        const createUser = await query(createQuery, values);
+        console.log(createUser)
+        // const token = Helper.generateToken(phone);
+        const getUser = await query(emailQuery, [email])
+        // console.log(getUser)
+        const token = Helper.generateToken(getUser.rows[0].phone);
+        const user = getUser.rows[0]
         return res.status(200).json({
             meta:{
-                status:200,
+                status: 200,
                 message:'Succesfully logged in',
             },
             data: {
                 jwt: token,
                 role: 'admin',
-                userId: checkEmail.rows[0].userid
+                token,
+                firstname: user.firstname,
+                lastname: user.lastname,
+                email: user.email,
+                phone: user.phone,
+                rating: user.rating,
+                jobsCompleted: user.jobs_completed,
+                walletBal: user.wallet_bal,
+                userId: user.user_id
+                // userId: checkEmail.rows[0].userid
             }
         });
     } catch (err) {
@@ -206,10 +222,10 @@ const login = async(req, res) => {
 }
 
 const getJobs = async(req, res) => {
-    const { user_id } = req.params;
-    const getQuery = "SELECT * FROM jobs WHERE user_id = $1";
+    // const { user_id } = req.params;
+    const getQuery = "SELECT j.*, u.firstname, u.lastname, u.email, u.phone FROM jobs j JOIN users u on j.user_id = u.user_id";
     try {
-        const getJob = await query(getQuery, [user_id]);
+        const getJob = await query(getQuery);
         if(!getJob.rows[0]) {
             return res.status(404).json({
                 meta:{
@@ -329,6 +345,39 @@ const getJobById = async(req, res) => {
     }
 }
 
+const getJobByUser = async(req, res) => {
+    const { user_id } = req.params;
+    const getQuery = "SELECT * FROM jobs WHERE user_id = $1";
+    console.log(user_id)
+    try {
+        const getJob = await query(getQuery, [user_id]);
+        console.log(getJob, user_id)
+        if(!getJob.rows[0]) {
+            return res.status(404).json({
+                meta:{
+                    status: 404,
+                    message: 'No Records found',
+                    info: 'No Records found'
+                }
+            })
+        } else {
+            return res.status(200).json({
+                meta:{
+                    status: 200,
+                    message: 'Success',
+                    info: 'Success'
+                },
+                data: {
+                    jobs: getJob.rows
+                }
+            })
+        }
+    }
+    catch (err) {
+        return res.status(400).send(err)
+    }
+}
+
 const postJob = async(req, res) => {
     const { userId, jobTitle, jobDesc, price, skillId, date } = req.body;
     const addQuery = "INSERT INTO jobs (user_id, job_title, job_desc, price, skill_id, date_added) VALUES ($1, $2, $3, $4, $5, $6)";
@@ -350,7 +399,7 @@ const postJob = async(req, res) => {
 
 const getUserBids = async(req, res) => {
     const { user_id } = req.params;
-    const getQuery = "SELECT * FROM bids WHERE user_id = $1";
+    const getQuery = "SELECT b.*, u.firstname, u.lastname, u.email, u.phone, j.job_title, j.job_desc FROM bids b join users u on b.client_id = u.user_id join jobs j on b.job_id = j.job_id WHERE b.user_id = $1";
     try {
         const getBids = await query(getQuery, [user_id]);
         if(!getBids.rows[0]) {
@@ -410,9 +459,9 @@ const getJobBids = async(req, res) => {
 }
 
 const postBid = async(req, res) => {
-    const {userId, jobId, skillId, skillLevel, message, duration, price, date} = req.body;
-    const addQuery = "INSERT INTO bids(user_id, job_id, skill_id, skill_level, message, duration, price, date_added) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)";
-    const values = [userId, jobId, skillId, skillLevel, message, duration, price, date];
+    const {userId, jobId, skillId, skillLevel, message, duration, price, date, clientId} = req.body;
+    const addQuery = "INSERT INTO bids(user_id, job_id, skill_id, skill_level, message, duration, price, date_added, client_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)";
+    const values = [userId, jobId, skillId, skillLevel, message, duration, price, date, clientId];
 
     try {
         await query(addQuery, values);
@@ -447,6 +496,66 @@ const creditWallet = async (req, res) => {
     }
 }
 
+const acceptBid = async (req, res) => {
+    const { userId, jobId, bidId, providerId, price } = req.body;
+    const uptJobQuery = 'UPDATE jobs SET assigned = $1, assigned_to = $2, date_assigned = $3, bid_id = $4 where job_id = $5';
+    const uptBidQuery = 'UPDATE bids SET accepted = $1, client_id = $2, date_accepted = $3 where bid_id = $4';
+    const uptClientQuery = 'UPDATE users SET wallet_bal = wallet_bal - $1, where user_id = $2'
+    const date = new Date().toISOString()
+    const jobValues = [true, providerId, date, bidId, jobId];
+    const bidValues = [true, userId, date, bidId]
+    const clientValues = [price, userId]
+    console.log(jobValues, bidValues)
+
+    try {
+        await query(uptJobQuery, jobValues);
+        await query(uptBidQuery, bidValues);
+        await query(uptClientQuery, clientValues)
+        res.status(200).json({
+            meta: {
+                status: 200,
+                message: 'Bid Accepted',
+                info: 'Succesful'
+            }
+        });
+    } catch (err) {
+        return res.status(400).send(err);
+    }
+}
+
+const completeJob = async (req, res) => {
+    console.log('completing job')
+    const { userId, jobId, bidId, providerId, rating, price } = req.body;
+    const uptJobQuery = 'UPDATE jobs SET completed = $1, date_completed = $2, WHERE job_id = $3';
+    // const uptBidQuery = 'UPDATE bids SET completed = $1, date_completed = $2, rating = $3 where bid_id = $4';
+    // const uptClientQuery = 'UPDATE users SET jobs_completed = jobs_completed + 1, where user_id = $1'
+    // const uptProviderQuery = 'UPDATE users SET bids_completed = bids_completed + 1, rating = ((rating * bids_completed) + $1)/(bids_completed + 1), wallet_bal = wallet_bal + $2, where user_id = $3'
+    const date = new Date().toISOString()
+    const jobValues = [true, date, jobId];
+    // const bidValues = [true, date, rating, bidId]
+    // const providerValues = [rating, price, providerId]
+    // const clientValues = [userId]
+    // console.log(jobValues, bidValues)
+    console.log(jobValues)
+    try {
+        await query(uptJobQuery, jobValues);
+        
+        // const bid = await query(uptBidQuery, bidValues);
+        // const client = await query(uptClientQuery, clientValues);
+        // const provider = await query(uptProviderQuery, providerValues);
+        // // console.log(job, bid, client, provider)
+        res.status(200).json({
+            meta: {
+                status: 200,
+                message: 'Job Completed',
+                info: 'Succesful'
+            }
+        });
+    } catch (err) {
+        return res.status(400).send(err);
+    }
+}
+
 module.exports = {
     getTable,
     signUp,
@@ -457,10 +566,13 @@ module.exports = {
     getSkills,
     getSkillJobs,
     getJobById,
+    getJobByUser,
     getUserBids,
     getJobBids,
     postJob,
     postBid,
     testfun,
-    creditWallet
+    creditWallet,
+    acceptBid,
+    completeJob
 }
