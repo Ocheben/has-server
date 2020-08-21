@@ -70,11 +70,12 @@ const initiateSignup = async (req, res) => {
     const checkEmailQuery = 'SELECT exists (SELECT 1 FROM users WHERE email = $1 LIMIT 1)';
     const checkPhoneQuery = 'SELECT exists (SELECT 1 FROM users WHERE phone = $1 LIMIT 1)';
     const addOtpQuery = 'INSERT INTO otps (phone, otp) VALUES ($1, $2) ON CONFLICT (phone) DO UPDATE SET otp = $2'
-    const apiKey = '5d79ca484c5eb4542c9e617a29c46628ce215f81d5e1b7c64feb8179bd2dd7ef';
+    // const sandboxApiKey = '5d79ca484c5eb4542c9e617a29c46628ce215f81d5e1b7c64feb8179bd2dd7ef';
+    const apiKey = '1ece7b909315c24cbb8eea9174ce3a5b595858462d182ac85aabae32a22734c0';
     const randomNumber = Math.floor(1000 + Math.random() * 9000);
     const message = 'Your login verification code is: ' + randomNumber;
     const africasTalking = new AfricasTalking({
-        username: 'sandbox',
+        username: 'hireaservice',
         apiKey: apiKey,
     });
     
@@ -500,12 +501,13 @@ const acceptBid = async (req, res) => {
     const { userId, jobId, bidId, providerId, price } = req.body;
     const uptJobQuery = 'UPDATE jobs SET assigned = $1, assigned_to = $2, date_assigned = $3, bid_id = $4 where job_id = $5';
     const uptBidQuery = 'UPDATE bids SET accepted = $1, client_id = $2, date_accepted = $3 where bid_id = $4';
-    const uptClientQuery = 'UPDATE users SET wallet_bal = wallet_bal - $1, where user_id = $2'
+    const uptClientQuery = 'UPDATE users SET wallet_bal = wallet_bal - $1 where user_id = $2'
     const date = new Date().toISOString()
     const jobValues = [true, providerId, date, bidId, jobId];
     const bidValues = [true, userId, date, bidId]
     const clientValues = [price, userId]
-    console.log(jobValues, bidValues)
+    // console.log(jobValues, bidValues)
+    console.log(price, userId)
 
     try {
         await query(uptJobQuery, jobValues);
@@ -519,6 +521,7 @@ const acceptBid = async (req, res) => {
             }
         });
     } catch (err) {
+        console.log(err)
         return res.status(400).send(err);
     }
 }
@@ -526,24 +529,24 @@ const acceptBid = async (req, res) => {
 const completeJob = async (req, res) => {
     console.log('completing job')
     const { userId, jobId, bidId, providerId, rating, price } = req.body;
-    const uptJobQuery = 'UPDATE jobs SET completed = $1, date_completed = $2, WHERE job_id = $3';
-    // const uptBidQuery = 'UPDATE bids SET completed = $1, date_completed = $2, rating = $3 where bid_id = $4';
-    // const uptClientQuery = 'UPDATE users SET jobs_completed = jobs_completed + 1, where user_id = $1'
-    // const uptProviderQuery = 'UPDATE users SET bids_completed = bids_completed + 1, rating = ((rating * bids_completed) + $1)/(bids_completed + 1), wallet_bal = wallet_bal + $2, where user_id = $3'
+    const uptJobQuery = 'UPDATE jobs SET completed = $1, date_completed = $2 WHERE job_id = $3';
+    const uptBidQuery = 'UPDATE bids SET completed = $1, date_completed = $2, rating = $3 where bid_id = $4';
+    const uptClientQuery = 'UPDATE users SET jobs_completed = jobs_completed + 1 where user_id = $1'
+    const uptProviderQuery = 'UPDATE users SET bids_completed = bids_completed + 1, rating = ((rating * bids_completed) + $1)/(bids_completed + 1), wallet_bal = wallet_bal + $2 where user_id = $3'
     const date = new Date().toISOString()
     const jobValues = [true, date, jobId];
-    // const bidValues = [true, date, rating, bidId]
-    // const providerValues = [rating, price, providerId]
-    // const clientValues = [userId]
+    const bidValues = [true, date, rating, bidId]
+    const providerValues = [rating, parseInt(price, 10), providerId]
+    const clientValues = [userId]
     // console.log(jobValues, bidValues)
     console.log(jobValues)
     try {
         await query(uptJobQuery, jobValues);
         
-        // const bid = await query(uptBidQuery, bidValues);
-        // const client = await query(uptClientQuery, clientValues);
-        // const provider = await query(uptProviderQuery, providerValues);
-        // // console.log(job, bid, client, provider)
+        const bid = await query(uptBidQuery, bidValues);
+        const client = await query(uptClientQuery, clientValues);
+        const provider = await query(uptProviderQuery, providerValues);
+        // console.log(job, bid, client, provider)
         res.status(200).json({
             meta: {
                 status: 200,
@@ -552,6 +555,7 @@ const completeJob = async (req, res) => {
             }
         });
     } catch (err) {
+        console.log(err)
         return res.status(400).send(err);
     }
 }
