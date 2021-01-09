@@ -578,5 +578,6 @@ module.exports = {
     testfun,
     creditWallet,
     acceptBid,
-    completeJob
+    completeJob,
+    query
 }

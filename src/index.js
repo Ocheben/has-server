@@ -1,6 +1,10 @@
 require('dotenv').config();
 const express = require('express');
 const db = require('./queries');
+const getUsers = require('./admin/users/getUsers').getUsers
+const verifyUser = require('./admin/users/verifyUser').verifyUser
+const addNuban = require('./wallet/addNuban').addNuban
+const initPayout = require('./wallet/initPayout').initPayout
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const Sentry = require('@sentry/node');
@@ -41,8 +45,15 @@ app.post('/jobs', db.postJob);
 app.post('/bids', db.postBid);
 app.post('/bids/accept',db.acceptBid)
 app.post('/jobs/complete',db.completeJob)
+
+// Wallet
+app.post('/wallet/add_nuban', addNuban);
+app.post('/wallet/init_payout', initPayout);
 app.post('/wallet', db.creditWallet);
 
+// Admin
+app.post('/users/verify', verifyUser)
+app.get('/users', getUsers);
 // The error handler must be before any other error middleware and after all controllers
 app.use(Sentry.Handlers.errorHandler());
 app.listen(process.env.PORT, () => {
