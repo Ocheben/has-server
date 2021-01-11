@@ -3,6 +3,7 @@ const express = require('express');
 const db = require('./queries');
 const getUsers = require('./admin/users/getUsers').getUsers
 const verifyUser = require('./admin/users/verifyUser').verifyUser
+const getBanks = require('./wallet/getBanks').getBanks
 const addNuban = require('./wallet/addNuban').addNuban
 const initPayout = require('./wallet/initPayout').initPayout
 const bodyParser = require('body-parser');
@@ -54,6 +55,8 @@ app.post('/wallet', db.creditWallet);
 // Admin
 app.post('/users/verify', verifyUser)
 app.get('/users', getUsers);
+app.get('/banks', getBanks)
+
 // The error handler must be before any other error middleware and after all controllers
 app.use(Sentry.Handlers.errorHandler());
 app.listen(process.env.PORT, () => {
