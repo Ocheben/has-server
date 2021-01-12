@@ -38,7 +38,6 @@ exports.initPayout = async(req, res) => {
                 'Content-Type': 'application/json'
             }
         })
-        console.log(payoutResponse)
 
         if(payoutResponse.status === 200 && payoutResponse.data.status) {
             const { reference, integration, transfer_code, createdAt, id, status } = payoutResponse.data.data
@@ -59,9 +58,10 @@ exports.initPayout = async(req, res) => {
             return res.status(200).json({
                 meta: {
                     status: 200,
-                    message: 'Payout Successfully Initiated',
+                    message: 'Transfer requires OTP to continue',
                     info: 'Success'
                 },
+                data: payoutResponse.data.data
             })
         }
     }

@@ -6,6 +6,7 @@ const verifyUser = require('./admin/users/verifyUser').verifyUser
 const getBanks = require('./wallet/getBanks').getBanks
 const addNuban = require('./wallet/addNuban').addNuban
 const initPayout = require('./wallet/initPayout').initPayout
+const finalizePayout = require('./wallet/finalizePayout').finalizePayout
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const Sentry = require('@sentry/node');
@@ -32,6 +33,7 @@ app.get('/', (req, res) => {
 })
 app.get('/db', db.getTable);
 app.post('/signup', db.signUp);
+app.post('/create_admin', db.createAdmin);
 app.post('/signup/init', db.initiateSignup);
 app.post('/signup/verify', db.verifyOtp);
 app.post('/login', db.login);
@@ -50,6 +52,7 @@ app.post('/jobs/complete',db.completeJob)
 // Wallet
 app.post('/wallet/add_nuban', addNuban);
 app.post('/wallet/init_payout', initPayout);
+app.post('/wallet/finalize_payout', finalizePayout);
 app.post('/wallet', db.creditWallet);
 
 // Admin

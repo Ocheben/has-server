@@ -18,7 +18,7 @@ exports.getBanks = async(req, res) => {
                     message: 'Success',
                     info: 'Success'
                 },
-                data: banksList.data
+                data: (banksList.data || {}).data
             })
         }
     }

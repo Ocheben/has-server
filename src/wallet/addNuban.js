@@ -3,6 +3,8 @@ const query = require('../queries').query
 
 exports.addNuban = async(req, res) => {
     const { nuban, bankCode, userId } = req.body;
+    let recipientCode;
+    console.log('bank')
     if (nuban === undefined || bankCode === undefined || userId === undefined) {
         return res.status(400).json({
             meta:{
@@ -53,6 +55,7 @@ exports.addNuban = async(req, res) => {
                         const addNubanResponse = await query(addNubanQuery, addNubanValues);
                         console.log('Nuban REspnse')
                         console.log(addNubanResponse)
+                        recipientCode = recipient_code
                         
                     } catch (err) {
                         console.log(err)
@@ -71,13 +74,15 @@ exports.addNuban = async(req, res) => {
                     }
                 })
             }
+            const bankData = nubanResponse.data.data
             return res.status(200).json({
                 meta: {
                     status: 200,
                     message: 'Success',
                     info: 'Success'
                 },
-                data: nubanResponse.data.data
+                data: bankData,
+                recipientCode
             })
         }
     }

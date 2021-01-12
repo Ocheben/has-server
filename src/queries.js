@@ -184,6 +184,35 @@ const signUp = async (req, res) => {
     }
 }
 
+const createAdmin = async (req, res) => {
+    const {email, password} = req.body;
+    const hashPassword = Helper.hashPassword(password);
+    const verifyQuery = 'SELECT exists (SELECT 1 FROM otps WHERE phone = $1 AND isVerified = true LIMIT 1)'
+    const createQuery = 'INSERT INTO users (email, password) VALUES ($1, $2)';
+    const checkEmailQuery = 'SELECT exists (SELECT 1 FROM users WHERE email = $1 LIMIT 1)';
+    const checkPhoneQuery = 'SELECT exists (SELECT 1 FROM users WHERE phone = $1 LIMIT 1)';
+    const emailQuery = 'SELECT * FROM users WHERE email = $1';
+    const values = [email, hashPassword];
+    
+    try {
+        const createUser = await query(createQuery, values);
+        console.log(createUser)
+        // const token = Helper.generateToken(phone);
+        // const getUser = await query(emailQuery, [email])
+        // console.log(getUser)
+        // const token = Helper.generateToken(getUser.rows[0].phone);
+        // const user = getUser.rows[0]
+        return res.status(200).json({
+            meta:{
+                status: 200,
+                message:'Succesfully created admin',
+            }
+        });
+    } catch (err) {
+        return res.status(400).send(err);
+    }
+}
+
 const login = async(req, res) => {
     const { email, password } = req.body;
     const emailQuery = 'SELECT * FROM users WHERE email = $1';
@@ -563,6 +592,7 @@ const completeJob = async (req, res) => {
 module.exports = {
     getTable,
     signUp,
+    createAdmin,
     initiateSignup,
     verifyOtp,
     login,
