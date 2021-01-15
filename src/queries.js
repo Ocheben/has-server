@@ -185,23 +185,13 @@ const signUp = async (req, res) => {
 }
 
 const createAdmin = async (req, res) => {
-    const {email, password} = req.body;
+    const {username, password} = req.body;
     const hashPassword = Helper.hashPassword(password);
-    const verifyQuery = 'SELECT exists (SELECT 1 FROM otps WHERE phone = $1 AND isVerified = true LIMIT 1)'
-    const createQuery = 'INSERT INTO users (email, password) VALUES ($1, $2)';
-    const checkEmailQuery = 'SELECT exists (SELECT 1 FROM users WHERE email = $1 LIMIT 1)';
-    const checkPhoneQuery = 'SELECT exists (SELECT 1 FROM users WHERE phone = $1 LIMIT 1)';
-    const emailQuery = 'SELECT * FROM users WHERE email = $1';
-    const values = [email, hashPassword];
+    const createQuery = 'INSERT INTO admins (username, password) VALUES ($1, $2)';
+    const values = [username, hashPassword];
     
     try {
         const createUser = await query(createQuery, values);
-        console.log(createUser)
-        // const token = Helper.generateToken(phone);
-        // const getUser = await query(emailQuery, [email])
-        // console.log(getUser)
-        // const token = Helper.generateToken(getUser.rows[0].phone);
-        // const user = getUser.rows[0]
         return res.status(200).json({
             meta:{
                 status: 200,
@@ -244,6 +234,37 @@ const login = async(req, res) => {
                 walletBal: user.wallet_bal,
                 role: 'admin',
                 userId: user.user_id
+            }
+        })
+    } catch (err) {
+        return res.status(400).send(err)
+    }
+}
+
+const adminLogin = async(req, res) => {
+    console.log('logging in')
+    const { username, password } = req.body;
+    const usernameQuery = 'SELECT * FROM admins WHERE username = $1';
+
+    try {
+        const checkUsername = await query(usernameQuery, [username])
+        if ( !checkUsername.rows[0] ) {
+            return res.status(406).json({meta: {status: 406, message: "Username is incorrect", info: "Username is incorrect"}})
+        }
+        if (!Helper.comparePassword(checkUsername.rows[0].password, password)) {
+            return res.status(406).json({meta:{status:406, message: 'Password is incorrect', info:'password is incorrect'}})
+        }
+        const token = Helper.generateToken(checkUsername.rows[0].phone);
+        const user = checkUsername.rows[0]
+        return res.status(200).json({
+            meta:{
+                status:200, 
+                message:`Welcome back ${checkUsername.rows[0].username}`, 
+                info:"Successful Login",
+            },
+            data: {
+                token,
+                username
             }
         })
     } catch (err) {
@@ -593,6 +614,7 @@ module.exports = {
     getTable,
     signUp,
     createAdmin,
+    adminLogin,
     initiateSignup,
     verifyOtp,
     login,

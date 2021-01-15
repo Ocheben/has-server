@@ -34,6 +34,7 @@ app.get('/', (req, res) => {
 app.get('/db', db.getTable);
 app.post('/signup', db.signUp);
 app.post('/create_admin', db.createAdmin);
+app.post('/admin_login', db.adminLogin);
 app.post('/signup/init', db.initiateSignup);
 app.post('/signup/verify', db.verifyOtp);
 app.post('/login', db.login);
